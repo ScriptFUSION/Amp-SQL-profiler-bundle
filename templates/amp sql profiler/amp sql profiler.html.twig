@@ -1,32 +1,33 @@
 {% extends '@WebProfiler/Profiler/layout.html.twig' %}
 
 {% block toolbar %}
-    {% set icon %}
-        {{ include('amp sql profiler/db.svg') }}
-        <span class="sf-toolbar-value">{{ collector.querycount }}</span>
-        <span class="sf-toolbar-info-piece-additional-detail">
-            <span class="sf-toolbar-label">in</span>
-            <span class="sf-toolbar-value">{{ '%0.2f'|format(collector.time * 1000) }}</span>
-            <span class="sf-toolbar-label">ms</span>
-        </span>
-    {% endset %}
-
-    {# The content displayed when hovering the mouse over the toolbar panel. #}
-    {% set text %}
-
-        <div class="sf-toolbar-info-piece">
-            <b>Database Queries</b>
-            <span class="sf-toolbar-status {{ collector.querycount > 50 ? 'sf-toolbar-status-yellow' : '' }}">
-                {{ collector.querycount }}
+    {% if collector.querycount > 0 %}
+        {% set icon %}
+            {{ include('amp sql profiler/db.svg') }}
+            <span class="sf-toolbar-value">{{ collector.querycount }}</span>
+            <span class="sf-toolbar-info-piece-additional-detail">
+                <span class="sf-toolbar-label">in</span>
+                <span class="sf-toolbar-value">{{ '%0.2f'|format(collector.time * 1000) }}</span>
+                <span class="sf-toolbar-label">ms</span>
             </span>
-        </div>
-        <div class="sf-toolbar-info-piece">
-            <b>Query time</b>
-            <span>{{ '%0.2f'|format(collector.time * 1000) }} ms</span>
-        </div>
-    {% endset %}
+        {% endset %}
 
-    {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { link: profiler_url }) }}
+        {# The content displayed when hovering the mouse over the toolbar panel. #}
+        {% set text %}
+            <div class="sf-toolbar-info-piece">
+                <b>Database Queries</b>
+                <span class="sf-toolbar-status {{ collector.querycount > 50 ? 'sf-toolbar-status-yellow' : '' }}">
+                    {{ collector.querycount }}
+                </span>
+            </div>
+            <div class="sf-toolbar-info-piece">
+                <b>Query time</b>
+                <span>{{ '%0.2f'|format(collector.time * 1000) }} ms</span>
+            </div>
+        {% endset %}
+
+        {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { link: profiler_url }) }}
+    {% endif %}
 {% endblock %}
 
 {% block menu %}

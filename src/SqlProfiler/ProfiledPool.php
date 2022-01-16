@@ -8,17 +8,15 @@ use Amp\Sql\Pool;
 use Amp\Sql\Transaction;
 use function Amp\call;
 
-final class ProfilingPool implements Pool
+final class ProfiledPool implements Pool
 {
+    /** @var SqlQuery[] A list of all queries executed on this pool, in execution order. */
     private array $sql = [];
 
     public function __construct(private Pool $pool)
     {
     }
 
-    /**
-     * @return SqlQuery[]
-     */
     public function getSql(): array
     {
         return $this->sql;
@@ -27,18 +25,7 @@ final class ProfilingPool implements Pool
     public function query(string $sql): Promise
     {
         return call(function () use ($sql): \Generator {
-            [$result, $time] = yield self::timeAsync($this->pool->query($sql));
-
-            $this->sql[] = new SqlQuery($sql, $time);
-
-            return $result;
-        });
-    }
-
-    public function prepare(string $sql): Promise
-    {
-        return call(function () use ($sql): \Generator {
-            [$result, $time] = yield self::timeAsync($this->pool->prepare($sql));
+            [$result, $time] = yield AsyncTimer::time($this->pool->query($sql));
 
             $this->sql[] = new SqlQuery($sql, $time);
 
@@ -49,7 +36,7 @@ final class ProfilingPool implements Pool
     public function execute(string $sql, array $params = []): Promise
     {
         return call(function () use ($sql, $params): \Generator {
-            [$result, $time] = yield self::timeAsync($this->pool->execute($sql, $params));
+            [$result, $time] = yield AsyncTimer::time($this->pool->execute($sql, $params));
 
             $this->sql[] = new SqlQuery($sql, $time, $params);
 
@@ -57,25 +44,22 @@ final class ProfilingPool implements Pool
         });
     }
 
-    private static function timeAsync(Promise $coroutine): Promise
+    /**
+     * @return Promise<Transaction>
+     */
+    public function beginTransaction(int $isolation = Transaction::ISOLATION_COMMITTED): Promise
     {
-        return call(static function () use ($coroutine): \Generator {
-            $start = microtime(true);
+        return call(fn () => new ProfiledTransaction($this->sql, yield $this->pool->beginTransaction($isolation)));
+    }
 
-            $result = yield $coroutine;
-
-            return [$result, microtime(true) - $start];
-        });
+    public function prepare(string $sql): Promise
+    {
+        return $this->pool->prepare($sql);
     }
 
     public function close(): void
     {
         $this->pool->close();
-    }
-
-    public function beginTransaction(int $isolation = Transaction::ISOLATION_COMMITTED): Promise
-    {
-        return $this->pool->beginTransaction($isolation);
     }
 
     public function extractConnection(): Promise
