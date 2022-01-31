@@ -80,6 +80,44 @@
                 <div>
                     <strong class="font-normal text-small">Parameters</strong>: {{ profiler_dump(query.params, 2) }}
                 </div>
+
+                <div class="text-small font-normal">
+                    <a href="#" class="sf-toggle link-inverse"
+                        data-toggle-selector="#backtrace-{{ loop.index }}"
+                        data-toggle-alt-content="Hide query backtrace">View query backtrace</a>
+                </div>
+
+                <div id="backtrace-{{ loop.index }}" class="hidden">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">File/Call</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for trace in query.backtrace %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>
+                                        <span class="text-small">
+                                            {% set line_number = trace.line|default(1) %}
+                                            {% if trace.file is defined %}
+                                                <a href="{{ trace.file|file_link(line_number) }}">
+                                            {% endif %}
+                                                {{- trace.class is defined ? trace.class ~ trace.type|default('::') -}}
+                                                <span class="status-warning">{{ trace.function }}</span>
+                                            {%- if trace.file is defined -%}
+                                                </a>
+                                            {% endif %}
+                                            (line {{ line_number }})
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </td>
         </tr>
         {% endfor %}
