@@ -13,7 +13,7 @@ final class ProfiledPool implements Pool
     /** @var SqlQuery[] A list of all queries executed on this pool, in execution order. */
     private array $sql = [];
 
-    public function __construct(private Pool $pool)
+    public function __construct(public Pool $pool)
     {
     }
 

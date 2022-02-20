@@ -7,12 +7,12 @@ use Amp\Sql\Pool;
 
 final class ProfiledPoolFactory
 {
-    public function __invoke(Pool $pool): Pool
+    public function __invoke(ProfiledPool $pool): Pool
     {
         if (PHP_SAPI === 'cli') {
-            return $pool;
+            return $pool->pool;
         }
 
-        return new ProfiledPool($pool);
+        return $pool;
     }
 }
