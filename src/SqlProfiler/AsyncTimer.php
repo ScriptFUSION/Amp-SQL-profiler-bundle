@@ -3,22 +3,18 @@ declare(strict_types=1);
 
 namespace ScriptFUSION\Club250\SqlProfiler;
 
-use Amp\Promise;
 use ScriptFUSION\StaticClass;
-use function Amp\call;
 
 final class AsyncTimer
 {
     use StaticClass;
 
-    public static function time(Promise $coroutine): Promise
+    public static function time(\Closure $closure): array
     {
-        return call(static function () use ($coroutine): \Generator {
-            $start = microtime(true);
+        $start = microtime(true);
 
-            $result = yield $coroutine;
+        $result = $closure();
 
-            return [$result, microtime(true) - $start];
-        });
+        return [$result, microtime(true) - $start];
     }
 }

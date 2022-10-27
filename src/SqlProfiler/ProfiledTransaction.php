@@ -3,9 +3,10 @@ declare(strict_types=1);
 
 namespace ScriptFUSION\Club250\SqlProfiler;
 
-use Amp\Promise;
+use Amp\Sql\Result;
+use Amp\Sql\Statement;
 use Amp\Sql\Transaction;
-use function Amp\call;
+use Amp\Sql\TransactionIsolation;
 
 final class ProfiledTransaction implements Transaction
 {
@@ -15,58 +16,60 @@ final class ProfiledTransaction implements Transaction
     {
     }
 
-    public function query(string $sql): Promise
+    public function query(string $sql): Result
     {
-        return call(function () use ($sql): \Generator {
-            [$result, $time] = yield AsyncTimer::time($this->transaction->query($sql));
+        [$result, $time] = AsyncTimer::time($this->transaction->query($sql));
 
-            $this->queryBuffer[] = new SqlQuery($sql, $time);
+        $this->queryBuffer[] = new SqlQuery($sql, $time);
 
-            return $result;
-        });
+        return $result;
     }
 
-    public function execute(string $sql, array $params = []): Promise
+    public function execute(string $sql, array $params = []): Result
     {
-        return call(function () use ($sql, $params): \Generator {
-            [$result, $time] = yield AsyncTimer::time($this->transaction->execute($sql, $params));
+        [$result, $time] = AsyncTimer::time(fn () => $this->transaction->execute($sql, $params));
 
-            $this->queryBuffer[] = new SqlQuery($sql, $time, $params);
+        $this->queryBuffer[] = new SqlQuery($sql, $time, $params);
 
-            return $result;
-        });
+        return $result;
     }
 
-    public function commit(): Promise
+    public function commit(): void
     {
-        return call(function (): \Generator {
-            [$result, $time] = yield AsyncTimer::time($this->transaction->commit());
+        [1 => $time] = AsyncTimer::time(fn () => $this->transaction->commit());
 
-            $this->sql = array_merge($this->sql, $this->queryBuffer, [new SqlQuery('COMMIT', $time)]);
-            $this->queryBuffer = [];
-
-            return $result;
-        });
+        $this->sql = array_merge($this->sql, $this->queryBuffer, [new SqlQuery('COMMIT', $time)]);
+        $this->queryBuffer = [];
     }
 
-    public function rollback(): Promise
+    public function rollback(): void
     {
         $this->queryBuffer = [];
 
-        return $this->transaction->rollback();
+        $this->transaction->rollback();
     }
 
-    public function prepare(string $sql): Promise
+    public function prepare(string $sql): Statement
     {
         // TODO: Implement prepare() method.
     }
 
-    public function close()
+    public function close(): void
     {
-        return $this->transaction->close();
+        $this->transaction->close();
     }
 
-    public function getIsolationLevel(): int
+    public function isClosed(): bool
+    {
+        return $this->transaction->isClosed();
+    }
+
+    public function onClose(\Closure $onClose): void
+    {
+        $this->transaction->onClose($onClose);
+    }
+
+    public function getIsolationLevel(): TransactionIsolation
     {
         return $this->transaction->getIsolationLevel();
     }
@@ -76,24 +79,19 @@ final class ProfiledTransaction implements Transaction
         return $this->transaction->isActive();
     }
 
-    public function createSavepoint(string $identifier): Promise
+    public function createSavepoint(string $identifier): void
     {
         // TODO: Implement createSavepoint() method.
     }
 
-    public function rollbackTo(string $identifier): Promise
+    public function rollbackTo(string $identifier): void
     {
         // TODO: Implement rollbackTo() method.
     }
 
-    public function releaseSavepoint(string $identifier): Promise
+    public function releaseSavepoint(string $identifier): void
     {
         // TODO: Implement releaseSavepoint() method.
-    }
-
-    public function isAlive(): bool
-    {
-        return $this->transaction->isAlive();
     }
 
     public function getLastUsedAt(): int

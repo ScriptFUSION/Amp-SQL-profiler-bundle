@@ -3,10 +3,13 @@ declare(strict_types=1);
 
 namespace ScriptFUSION\Club250\SqlProfiler;
 
-use Amp\Promise;
+use Amp\Sql\Link;
 use Amp\Sql\Pool;
+use Amp\Sql\Result;
+use Amp\Sql\Statement;
 use Amp\Sql\Transaction;
-use function Amp\call;
+use Amp\Sql\TransactionIsolation;
+use Amp\Sql\TransactionIsolationLevel;
 
 final class ProfiledPool implements Pool
 {
@@ -22,37 +25,31 @@ final class ProfiledPool implements Pool
         return $this->sql;
     }
 
-    public function query(string $sql): Promise
+    public function query(string $sql): Result
     {
-        return call(function () use ($sql): \Generator {
-            [$result, $time] = yield AsyncTimer::time($this->pool->query($sql));
+        [$result, $time] = AsyncTimer::time(fn () => $this->pool->query($sql));
 
-            $this->sql[] = new SqlQuery($sql, $time);
+        $this->sql[] = new SqlQuery($sql, $time);
 
-            return $result;
-        });
+        return $result;
     }
 
-    public function execute(string $sql, array $params = []): Promise
+    public function execute(string $sql, array $params = []): Result
     {
-        return call(function () use ($sql, $params): \Generator {
-            [$result, $time] = yield AsyncTimer::time($this->pool->execute($sql, $params));
+        [$result, $time] = AsyncTimer::time(fn () => $this->pool->execute($sql, $params));
 
-            $this->sql[] = new SqlQuery($sql, $time, $params);
+        $this->sql[] = new SqlQuery($sql, $time, $params);
 
-            return $result;
-        });
+        return $result;
     }
 
-    /**
-     * @return Promise<Transaction>
-     */
-    public function beginTransaction(int $isolation = Transaction::ISOLATION_COMMITTED): Promise
-    {
-        return call(fn () => new ProfiledTransaction($this->sql, yield $this->pool->beginTransaction($isolation)));
+    public function beginTransaction(
+        TransactionIsolation $isolation = TransactionIsolationLevel::Committed,
+    ): Transaction {
+        return new ProfiledTransaction($this->sql, $this->pool->beginTransaction($isolation));
     }
 
-    public function prepare(string $sql): Promise
+    public function prepare(string $sql): Statement
     {
         return $this->pool->prepare($sql);
     }
@@ -62,7 +59,17 @@ final class ProfiledPool implements Pool
         $this->pool->close();
     }
 
-    public function extractConnection(): Promise
+    public function isClosed(): bool
+    {
+        return $this->pool->isClosed();
+    }
+
+    public function onClose(\Closure $onClose): void
+    {
+        $this->pool->onClose($onClose);
+    }
+
+    public function extractConnection(): Link
     {
         return $this->pool->extractConnection();
     }
@@ -85,11 +92,6 @@ final class ProfiledPool implements Pool
     public function getIdleTimeout(): int
     {
         return $this->pool->getIdleTimeout();
-    }
-
-    public function isAlive(): bool
-    {
-        return $this->pool->isAlive();
     }
 
     public function getLastUsedAt(): int
