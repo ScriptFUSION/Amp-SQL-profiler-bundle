@@ -12,7 +12,7 @@ final class ProfiledTransaction implements Transaction
 {
     private array $queryBuffer = [];
 
-    public function __construct(private array &$sql, private Transaction $transaction)
+    public function __construct(private array &$sql, private readonly Transaction $transaction)
     {
     }
 

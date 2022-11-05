@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 final class SqlDataCollector extends AbstractDataCollector
 {
-    public function __construct(private ProfiledPool $profilingPool)
+    public function __construct(private readonly ProfiledPool $profilingPool)
     {
     }
 
