@@ -1,0 +1,21 @@
+{
+    "name": "async/amp-sql-profiler-bundle",
+    "description": "Amp SQL profiler for Symfony WebProfilerBundle.",
+    "type": "symfony-bundle",
+    "authors": [
+        {
+            "name": "Bilge",
+            "email": "bilge@scriptfusion.com"
+        }
+    ],
+    "require": {
+        "amphp/sql": "2.0.0-beta.5",
+        "scriptfusion/static-class": "^1",
+        "symfony/web-profiler-bundle": "^6"
+    },
+    "autoload": {
+        "psr-4": {
+            "ScriptFUSION\\AmpSqlProfilerBundle\\": "src"
+        }
+    }
+}

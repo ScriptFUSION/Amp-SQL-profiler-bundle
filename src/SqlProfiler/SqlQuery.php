@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace ScriptFUSION\Club250\SqlProfiler;
+namespace ScriptFUSION\AmpSqlProfilerBundle;
 
 use Symfony\Component\VarDumper\Cloner\Data;
 
