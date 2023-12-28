@@ -1,0 +1,9 @@
+services:
+  ScriptFUSION\AmpSqlProfilerBundle\SqlDataCollector:
+    arguments:
+      - '@ScriptFUSION\AmpSqlProfilerBundle\ProfiledPool'
+    tags:
+      - data_collector
+
+  ScriptFUSION\AmpSqlProfilerBundle\ProfiledPool: ~
+  ScriptFUSION\AmpSqlProfilerBundle\ProfiledPoolFactory: ~
