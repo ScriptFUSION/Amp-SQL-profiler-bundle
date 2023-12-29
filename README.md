@@ -13,6 +13,14 @@ Profiles Amp SQL connections in Symfony applications and displays the results in
 * Supports transactions.
 * Supports backtraces.
 
+
+### Limitations
+
+Using an unsupported feature may throw `NotImplementedException`.
+
+* Does not support prepared statements.
+* Does not support transaction save points.
+
 Installation
 ------------
 

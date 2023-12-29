@@ -52,6 +52,7 @@ final class ProfiledTransaction implements Transaction
     public function prepare(string $sql): Statement
     {
         // TODO: Implement prepare() method.
+        throw new NotImplementedException();
     }
 
     public function close(): void
@@ -82,20 +83,48 @@ final class ProfiledTransaction implements Transaction
     public function createSavepoint(string $identifier): void
     {
         // TODO: Implement createSavepoint() method.
+        throw new NotImplementedException();
     }
 
     public function rollbackTo(string $identifier): void
     {
         // TODO: Implement rollbackTo() method.
+        throw new NotImplementedException();
     }
 
     public function releaseSavepoint(string $identifier): void
     {
         // TODO: Implement releaseSavepoint() method.
+        throw new NotImplementedException();
     }
 
     public function getLastUsedAt(): int
     {
         return $this->transaction->getLastUsedAt();
+    }
+
+    public function beginTransaction(): Transaction
+    {
+        return new self($this->sql, $this->transaction->beginTransaction());
+    }
+
+    public function getIsolation(): TransactionIsolation
+    {
+        return $this->transaction->getIsolation();
+    }
+
+    public function getSavepointIdentifier(): ?string
+    {
+        return $this->transaction->getSavepointIdentifier();
+    }
+
+    public function onCommit(\Closure $onCommit): void
+    {
+        $this->transaction->onCommit($onCommit);
+    }
+
+    public function onRollback(\Closure $onRollback): void
+    {
+        $this->transaction->onRollback($onRollback);
     }
 }

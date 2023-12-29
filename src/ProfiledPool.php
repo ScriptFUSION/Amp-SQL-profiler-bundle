@@ -3,9 +3,10 @@ declare(strict_types=1);
 
 namespace ScriptFUSION\AmpSqlProfilerBundle;
 
-use Amp\Sql\Link;
+use Amp\Sql\Connection;
 use Amp\Sql\Pool;
 use Amp\Sql\Result;
+use Amp\Sql\SqlConfig;
 use Amp\Sql\Statement;
 use Amp\Sql\Transaction;
 use Amp\Sql\TransactionIsolation;
@@ -69,7 +70,7 @@ final class ProfiledPool implements Pool
         $this->pool->onClose($onClose);
     }
 
-    public function extractConnection(): Link
+    public function extractConnection(): Connection
     {
         return $this->pool->extractConnection();
     }
@@ -97,5 +98,20 @@ final class ProfiledPool implements Pool
     public function getLastUsedAt(): int
     {
         return $this->pool->getLastUsedAt();
+    }
+
+    public function getConfig(): SqlConfig
+    {
+        return $this->pool->getConfig();
+    }
+
+    public function getTransactionIsolation(): TransactionIsolation
+    {
+        return $this->pool->getTransactionIsolation();
+    }
+
+    public function setTransactionIsolation(TransactionIsolation $isolation): void
+    {
+        $this->pool->setTransactionIsolation($isolation);
     }
 }
