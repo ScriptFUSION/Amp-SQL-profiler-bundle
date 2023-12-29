@@ -22,7 +22,7 @@ final class SqlDataCollector extends AbstractDataCollector
 
     public static function getTemplate(): ?string
     {
-        return 'amp sql profiler/amp sql profiler';
+        return '@AmpSqlProfiler/amp sql profiler';
     }
 
     /**

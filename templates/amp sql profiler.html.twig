@@ -4,7 +4,7 @@
 {% block toolbar %}
     {% if collector.querycount > 0 %}
         {% set icon %}
-            {{ include('amp sql profiler/db.svg') }}
+            {{ include('@AmpSqlProfiler/db.svg') }}
             <span class="sf-toolbar-value">{{ collector.querycount }}</span>
             <span class="sf-toolbar-info-piece-additional-detail">
                 <span class="sf-toolbar-label">in</span>
@@ -33,7 +33,7 @@
 
 {% block menu %}
     <span class="label {{ collector.querycount == 0 ? 'disabled' }}">
-        <span class="icon">{{ include('amp sql profiler/db.svg') }}</span>
+        <span class="icon">{{ include('@AmpSqlProfiler/db.svg') }}</span>
         <strong>Amp SQL</strong>
         <span class="count">{{ collector.querycount }}</span>
     </span>
