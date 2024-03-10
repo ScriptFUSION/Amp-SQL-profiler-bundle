@@ -10,7 +10,7 @@
     ],
     "require": {
         "php": "^8.2",
-        "amphp/sql": "^2@beta",
+        "amphp/sql": "^2",
         "scriptfusion/static-class": "^1",
         "symfony/web-profiler-bundle": "^6"
     },

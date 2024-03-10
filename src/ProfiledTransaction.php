@@ -3,20 +3,20 @@ declare(strict_types=1);
 
 namespace ScriptFUSION\AmpSqlProfilerBundle;
 
-use Amp\Sql\Result;
-use Amp\Sql\Statement;
-use Amp\Sql\Transaction;
-use Amp\Sql\TransactionIsolation;
+use Amp\Sql\SqlResult;
+use Amp\Sql\SqlStatement;
+use Amp\Sql\SqlTransaction;
+use Amp\Sql\SqlTransactionIsolation;
 
-final class ProfiledTransaction implements Transaction
+final class ProfiledTransaction implements SqlTransaction
 {
     private array $queryBuffer = [];
 
-    public function __construct(private array &$sql, private readonly Transaction $transaction)
+    public function __construct(private array &$sql, private readonly SqlTransaction $transaction)
     {
     }
 
-    public function query(string $sql): Result
+    public function query(string $sql): SqlResult
     {
         [$result, $time] = AsyncTimer::time($this->transaction->query($sql));
 
@@ -25,7 +25,7 @@ final class ProfiledTransaction implements Transaction
         return $result;
     }
 
-    public function execute(string $sql, array $params = []): Result
+    public function execute(string $sql, array $params = []): SqlResult
     {
         [$result, $time] = AsyncTimer::time(fn () => $this->transaction->execute($sql, $params));
 
@@ -49,7 +49,7 @@ final class ProfiledTransaction implements Transaction
         $this->transaction->rollback();
     }
 
-    public function prepare(string $sql): Statement
+    public function prepare(string $sql): SqlStatement
     {
         // TODO: Implement prepare() method.
         throw new NotImplementedException();
@@ -70,32 +70,9 @@ final class ProfiledTransaction implements Transaction
         $this->transaction->onClose($onClose);
     }
 
-    public function getIsolationLevel(): TransactionIsolation
-    {
-        return $this->transaction->getIsolationLevel();
-    }
-
     public function isActive(): bool
     {
         return $this->transaction->isActive();
-    }
-
-    public function createSavepoint(string $identifier): void
-    {
-        // TODO: Implement createSavepoint() method.
-        throw new NotImplementedException();
-    }
-
-    public function rollbackTo(string $identifier): void
-    {
-        // TODO: Implement rollbackTo() method.
-        throw new NotImplementedException();
-    }
-
-    public function releaseSavepoint(string $identifier): void
-    {
-        // TODO: Implement releaseSavepoint() method.
-        throw new NotImplementedException();
     }
 
     public function getLastUsedAt(): int
@@ -103,12 +80,12 @@ final class ProfiledTransaction implements Transaction
         return $this->transaction->getLastUsedAt();
     }
 
-    public function beginTransaction(): Transaction
+    public function beginTransaction(): SqlTransaction
     {
         return new self($this->sql, $this->transaction->beginTransaction());
     }
 
-    public function getIsolation(): TransactionIsolation
+    public function getIsolation(): SqlTransactionIsolation
     {
         return $this->transaction->getIsolation();
     }

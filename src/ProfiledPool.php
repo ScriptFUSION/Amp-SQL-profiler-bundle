@@ -3,21 +3,20 @@ declare(strict_types=1);
 
 namespace ScriptFUSION\AmpSqlProfilerBundle;
 
-use Amp\Sql\Connection;
-use Amp\Sql\Pool;
-use Amp\Sql\Result;
 use Amp\Sql\SqlConfig;
-use Amp\Sql\Statement;
-use Amp\Sql\Transaction;
-use Amp\Sql\TransactionIsolation;
-use Amp\Sql\TransactionIsolationLevel;
+use Amp\Sql\SqlConnection;
+use Amp\Sql\SqlConnectionPool;
+use Amp\Sql\SqlResult;
+use Amp\Sql\SqlStatement;
+use Amp\Sql\SqlTransaction;
+use Amp\Sql\SqlTransactionIsolation;
 
-final class ProfiledPool implements Pool
+final class ProfiledPool implements SqlConnectionPool
 {
     /** @var SqlQuery[] A list of all queries executed on this pool, in execution order. */
     private array $sql = [];
 
-    public function __construct(public Pool $pool)
+    public function __construct(public SqlConnectionPool $pool)
     {
     }
 
@@ -26,7 +25,7 @@ final class ProfiledPool implements Pool
         return $this->sql;
     }
 
-    public function query(string $sql): Result
+    public function query(string $sql): SqlResult
     {
         [$result, $time] = AsyncTimer::time(fn () => $this->pool->query($sql));
 
@@ -35,7 +34,7 @@ final class ProfiledPool implements Pool
         return $result;
     }
 
-    public function execute(string $sql, array $params = []): Result
+    public function execute(string $sql, array $params = []): SqlResult
     {
         [$result, $time] = AsyncTimer::time(fn () => $this->pool->execute($sql, $params));
 
@@ -44,13 +43,12 @@ final class ProfiledPool implements Pool
         return $result;
     }
 
-    public function beginTransaction(
-        TransactionIsolation $isolation = TransactionIsolationLevel::Committed,
-    ): Transaction {
-        return new ProfiledTransaction($this->sql, $this->pool->beginTransaction($isolation));
+    public function beginTransaction(): SqlTransaction
+    {
+        return new ProfiledTransaction($this->sql, $this->pool->beginTransaction());
     }
 
-    public function prepare(string $sql): Statement
+    public function prepare(string $sql): SqlStatement
     {
         return $this->pool->prepare($sql);
     }
@@ -70,7 +68,7 @@ final class ProfiledPool implements Pool
         $this->pool->onClose($onClose);
     }
 
-    public function extractConnection(): Connection
+    public function extractConnection(): SqlConnection
     {
         return $this->pool->extractConnection();
     }
@@ -105,12 +103,12 @@ final class ProfiledPool implements Pool
         return $this->pool->getConfig();
     }
 
-    public function getTransactionIsolation(): TransactionIsolation
+    public function getTransactionIsolation(): SqlTransactionIsolation
     {
         return $this->pool->getTransactionIsolation();
     }
 
-    public function setTransactionIsolation(TransactionIsolation $isolation): void
+    public function setTransactionIsolation(SqlTransactionIsolation $isolation): void
     {
         $this->pool->setTransactionIsolation($isolation);
     }
