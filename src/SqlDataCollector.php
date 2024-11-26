@@ -13,7 +13,7 @@ final class SqlDataCollector extends AbstractDataCollector
     {
     }
 
-    public function collect(Request $request, Response $response, \Throwable $exception = null): void
+    public function collect(Request $request, Response $response, ?\Throwable $exception = null): void
     {
         foreach ($this->data['sql'] = $this->profilingPool->getSql() as $query) {
             $query->params = $this->cloneVar($query->params);
