@@ -12,7 +12,7 @@
         "php": "^8.2",
         "amphp/sql": "^2",
         "scriptfusion/static-class": "^1",
-        "symfony/web-profiler-bundle": "^6"
+        "symfony/web-profiler-bundle": "^6|^7"
     },
     "autoload": {
         "psr-4": {
