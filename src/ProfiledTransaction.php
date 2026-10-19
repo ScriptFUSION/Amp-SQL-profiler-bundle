@@ -18,7 +18,7 @@ final class ProfiledTransaction implements SqlTransaction
 
     public function query(string $sql): SqlResult
     {
-        [$result, $time] = AsyncTimer::time($this->transaction->query($sql));
+        [$result, $time] = AsyncTimer::time(fn () => $this->transaction->query($sql));
 
         $this->queryBuffer[] = new SqlQuery($sql, $time);
 
